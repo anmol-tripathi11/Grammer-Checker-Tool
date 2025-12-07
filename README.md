@@ -218,22 +218,3 @@ Readability scoring
 
 📝 License
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-🙏 Acknowledgments
-LanguageTool for comprehensive grammar rules
-
-Scikit-learn for machine learning framework
-
-Flask for web framework
-
-Contributors who help improve this tool
-
-📞 Support
-For issues, questions, or suggestions:
-
-Check the Issues page
-
-Create a new issue if needed
-
-Include detailed description and examples
-
