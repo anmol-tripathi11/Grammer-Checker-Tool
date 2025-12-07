@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Checker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #4361ee;
+            margin-bottom: 10px;
+        }
+        
+        .main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .main {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #4361ee;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 250px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #4361ee;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .check-btn {
+            background: #4361ee;
+            color: white;
+            flex: 1;
+        }
+        
+        .check-btn:hover {
+            background: #3a56d4;
+        }
+        
+        .clear-btn {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .clear-btn:hover {
+            background: #5a6268;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4361ee;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4361ee;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .result-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .result-box h3 {
+            color: #4361ee;
+            margin-bottom: 10px;
+        }
+        
+        .corrected-text {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .errors-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .error-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #fff5f5;
+            border-left: 4px solid #dc3545;
+            border-radius: 5px;
+        }
+        
+        .error-item.medium {
+            background: #fffaf0;
+            border-left-color: #ffc107;
+        }
+        
+        .error-item.low {
+            background: #e7f6f8;
+            border-left-color: #17a2b8;
+        }
+        
+        .error-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .error-type {
+            background: #dc3545;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .error-item.medium .error-type {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .error-item.low .error-type {
+            background: #17a2b8;
+        }
+        
+        .error-severity {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .error-text {
+            margin-bottom: 8px;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        
+        .error-correction {
+            color: #28a745;
+            font-weight: 500;
+            padding: 8px;
+            background: #e7f7e7;
+            border-radius: 4px;
+            border: 1px solid #d4edda;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #eee;
+            border-top: 4px solid #4361ee;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .success {
+            color: #28a745;
+        }
+        
+        .error {
+            color: #dc3545;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Grammar Checker</h1>
+            <p>Check and correct grammar errors instantly</p>
+        </header>
+        
+        <div class="main">
+            <div class="panel">
+                <h2>Enter Your Text</h2>
+                <textarea id="inputText" placeholder="Type or paste your text here...">I will do it yesterday. She go to school. Their happy to see you. I wan to go there tomorrow.</textarea>
+                
+                <div class="buttons">
+                    <button class="check-btn" onclick="checkGrammar()">
+                        <i class="fas fa-search"></i> Check Grammar
+                    </button>
+                    <button class="clear-btn" onclick="clearText()">
+                        <i class="fas fa-eraser"></i> Clear
+                    </button>
+                </div>
+                
+                <div class="result-box">
+                    <h3>How to Use</h3>
+                    <p>1. Type or paste your text above</p>
+                    <p>2. Click "Check Grammar"</p>
+                    <p>3. See errors and corrections on the right</p>
+                    <p style="margin-top: 10px; color: #4361ee;">
+                        <i class="fas fa-lightbulb"></i> Try: "I will do it yesterday" (tense error)
+                    </p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Results</h2>
+                
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-value" id="scoreValue">100</div>
+                        <div class="stat-label">Grammar Score</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="errorCount">0</div>
+                        <div class="stat-label">Total Errors</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="wordCount">0</div>
+                        <div class="stat-label">Words</div>
+                    </div>
+                </div>
+                
+                <div id="loading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Checking grammar...</p>
+                </div>
+                
+                <div id="results" style="display: none;">
+                    <div class="result-box">
+                        <h3>Corrected Text</h3>
+                        <div class="corrected-text" id="correctedText"></div>
+                    </div>
+                    
+                    <h3 style="margin-bottom: 15px;">Errors Found</h3>
+                    <div class="errors-list" id="errorsList"></div>
+                </div>
+                
+                <div id="emptyState" class="loading">
+                    <i class="fas fa-file-alt" style="font-size: 48px; color: #ccc; margin-bottom: 15px;"></i>
+                    <p>Enter text and click "Check Grammar" to see results</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status">
+            <p id="backendStatus">Checking backend connection...</p>
+        </div>
+        
+        <footer>
+            <p>Grammar Checker Tool &copy; 2024</p>
+        </footer>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/check';
+        const HEALTH_URL = 'http://localhost:5000/api/health';
+        
+        // Check backend on load
+        window.onload = function() {
+            checkBackend();
+        };
+        
+        function checkBackend() {
+            fetch(HEALTH_URL)
+                .then(response => response.json())
+                .then(data => {
+                    const statusElement = document.getElementById('backendStatus');
+                    if (data.status === 'running') {
+                        statusElement.innerHTML = `<span class="success"><i class="fas fa-check-circle"></i> Backend connected (${data.models_loaded} models loaded)</span>`;
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('backendStatus').innerHTML = 
+                        '<span class="error"><i class="fas fa-exclamation-circle"></i> Backend not connected. Please start the server.</span>';
+                });
+        }
+        
+        function checkGrammar() {
+            const text = document.getElementById('inputText').value.trim();
+            
+            if (!text) {
+                alert('Please enter some text to check.');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+            
+            // Call API
+            fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                if (data.success) {
+                    showResults(data);
+                } else {
+                    showError(data.error || 'An error occurred');
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                showError('Cannot connect to server. Make sure backend is running on port 5000.');
+            });
+        }
+        
+        function showResults(data) {
+            // Update stats
+            document.getElementById('scoreValue').textContent = data.score;
+            document.getElementById('errorCount').textContent = data.error_count;
+            document.getElementById('wordCount').textContent = data.word_count;
+            
+            // Show corrected text
+            document.getElementById('correctedText').textContent = data.corrected_text;
+            
+            // Show errors
+            const errorsList = document.getElementById('errorsList');
+            errorsList.innerHTML = '';
+            
+            if (data.errors.length === 0) {
+                errorsList.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-check-circle" style="font-size: 48px; color: #28a745; margin-bottom: 15px;"></i>
+                        <h3>Perfect!</h3>
+                        <p>No grammar errors found.</p>
+                    </div>
+                `;
+            } else {
+                data.errors.forEach(error => {
+                    const errorItem = document.createElement('div');
+                    errorItem.className = `error-item ${error.severity}`;
+                    
+                    errorItem.innerHTML = `
+                        <div class="error-header">
+                            <span class="error-type">${error.type}</span>
+                            <span class="error-severity">${error.severity.toUpperCase()}</span>
+                        </div>
+                        <div class="error-text">
+                            <strong>Error:</strong> ${escapeHtml(error.text)}
+                        </div>
+                        <div class="error-correction">
+                            <strong>Correction:</strong> ${escapeHtml(error.correction)}
+                        </div>
+                    `;
+                    
+                    errorsList.appendChild(errorItem);
+                });
+            }
+            
+            // Show results section
+            document.getElementById('results').style.display = 'block';
+        }
+        
+        function showError(message) {
+            document.getElementById('emptyState').innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 15px;"></i>
+                    <h3>Error</h3>
+                    <p>${escapeHtml(message)}</p>
+                    <button onclick="checkGrammar()" style="margin-top: 15px; padding: 10px 20px; background: #4361ee; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Try Again
+                    </button>
+                </div>
+            `;
+            document.getElementById('emptyState').style.display = 'block';
+        }
+        
+        function clearText() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'block';
+            document.getElementById('scoreValue').textContent = '100';
+            document.getElementById('errorCount').textContent = '0';
+            document.getElementById('wordCount').textContent = '0';
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Keyboard shortcut
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                checkGrammar();
+            }
+        });
+    </script>
+</body>
+</html>
