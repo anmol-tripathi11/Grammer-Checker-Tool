@@ -50,6 +50,15 @@ Or serve it using a local web server:
 
 bash
 python -m http.server 8000
+
+Generating models; Run
+
+bash
+python train.py #Generates ml models, trained via datasets
+
+Datasets can be downloaded from https://www.kaggle.com
+
+
 🏗️ Project Structure
 text
 grammar-checker/
