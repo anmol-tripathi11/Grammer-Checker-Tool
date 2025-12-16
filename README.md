@@ -22,12 +22,6 @@ Python 3.8+
 
 pip package manager
 
-Installation
-Clone the repository
-
-bash
-git clone https://github.com/yourusername/grammar-checker.git
-cd grammar-checker
 Install dependencies
 
 bash
